@@ -1,63 +1,80 @@
-Title: Unleashing the Power of Terraform: A Definitive Blog
+<h1>What is Terraform?</h>
+Infrastructure as Code (IaC) is a key part of a balanced cloud breakfast. And when it comes to IaC tools, Terraform is one of the top tools out there. (Which IaC tool is right for you? Check out our guide to IaC on AWS.)
 
-Introduction:
-The modern digital landscape demands agility, scalability, and reliability from infrastructure management. Traditional methods fall short in a world that requires speed and precision. Enter Terraform – your ticket to efficient and scalable infrastructure. This blog post is your gateway to understanding Terraform's essence, its advantages, practical applications, and a step-by-step guide to kickstart your Terraform journey.
+Terraform came onto the scene in 2014 to orchestrate infrastructure as code. It first targeted AWS but has grown to play nicely with a large ecosystem of modules, including Google Cloud Platform (GCP), Microsoft Azure, Oracle Cloud Infrastructure, and Alibaba Cloud. In fact, multi-provider support is one of the main selling points of Terraform.
 
-Table of Contents:
+Terraform introduced its own DSL, called Hashicorp Configuration Language (HCL). On the surface, it feels like a more human-friendly JSON, which is also natively supported within Terraform.
 
-Terraform Unveiled: The Essentials
+HCL is a powerful configuration language that helps use Terraform to the highest potential!
 
-A Brief Introduction to Terraform
-Decoding Terraform's Operational Magic
-Navigating Key Concepts: Providers, Resources, Variables, and State
-Why Choose Terraform? Use Cases and Boons
+Want to learn more about HCL2? Test your HCL2 skills by fixing an inaccurately written HCL2 Packer template with our hands-on lab!
 
-Harnessing the Power of Infrastructure as Code (IaC)
-Liberating Infrastructure from Cloud Lock-in
-Seamless Scaling Made Achievable
-Crafting Cohesion Across Varied Environments
-Embarking on Your Terraform Odyssey
+Terraform Command Lines
+Terraform CLI tricks
 
-Installing Terraform: Your First Step
-Crafting Your Maiden Terraform Configuration
-Initializing and Effectuating Your Terraform Blueprint
-Voyage into Terraform Configurations
+terraform -install-autocomplete #Setup tab auto-completion, requires logging back in
+Format and Validate Terraform code
 
-Crafting Provider Declarations: AWS, Azure, Google Cloud, and More
-Envisioning Resources: VMs, Networks, Databases, and Beyond
-Governing Variables and Gleaning Outputs
-Mastering Reusability with Mighty Modules
-Nurturing Terraform Excellence: Best Practices
+terraform fmt #format code per HCL canonical standard
+terraform validate #validate code for syntax
+terraform validate -backend=false #validate code skip backend validation
+Initialize your Terraform working directory
 
-Engaging Version Control (Git) for Infrastructure Code
-Crafting Code that's Modular and Maintainable
-Workspaces: Your Playground for Diverse Environments
-Orchestrating Continuous Deployment via the Art of GitOps
-Terraform State Mastery and Collaborative Valor
+terraform init #initialize directory, pull down providers
+terraform init -get-plugins=false #initialize directory, do not download plugins
+terraform init -verify-plugins=false #initialize directory, do not verify plugins for Hashicorp signature
+Plan, Deploy and Cleanup Infrastructure
 
-Unveiling the Enigma of Terraform State Files
-Remote State Management: Terraform Cloud, AWS S3, and More
-Fostering Collaboration via Remote Backends
-Reality Check: Terraform in Action
+terraform apply --auto-approve #apply changes without being prompted to enter "yes"
+terraform destroy --auto-approve #destroy/cleanup deployment without being prompted for “yes”
+terraform plan -out plan.out #output the deployment plan to plan.out
+terraform apply plan.out #use the plan.out plan file to deploy infrastructure
+terraform plan -destroy #outputs a destroy plan
+terraform apply -target=aws_instance.my_ec2 #only apply/deploy changes to the targeted resource
+terraform apply -var my_region_variable=us-east-1 #pass a variable via command-line while applying a configuration
+terraform apply -lock=true #lock the state file so it can't be modified by any other Terraform apply or modification action(possible only where backend allows locking)
+terraform apply refresh=false # do not reconcile state file with real-world resources(helpful with large complex deployments for saving deployment time)
+terraform apply --parallelism=5 #number of simultaneous resource operations
+terraform refresh #reconcile the state in Terraform state file with real-world resources
+terraform providers #get information about providers used in current configuration
+Terraform Workspaces
 
-Pioneering a Multi-tier Web Application's Creation
-The Saga of Forging a Fault-tolerant Kubernetes Cluster
-Sculpting Serverless Architectures with Finesse
-Terraform: Unlocking Advanced Frontiers
+terraform workspace new mynewworkspace #create a new workspace
+terraform workspace select default #change to the selected workspace
+terraform workspace list #list out all workspaces
+Terraform State Manipulation
 
-Navigating the Waters of State Locking and Concurrent Changes
-Orchestrating Prudent Changes via Terraform Plan
-Guardian of Secrets: Navigating Sensitive Data
-Marching with CI/CD Pipelines: Terraform's New Frontier
-Decoding Dilemmas: Debugging and Troubleshooting
+terraform state show aws_instance.my_ec2 #show details stored in Terraform state for the resource
+terraform state pull > terraform.tfstate #download and output terraform state to a file
+terraform state mv aws_iam_role.my_ssm_role module.custom_module #move a resource tracked via state to different module
+terraform state replace-provider hashicorp/aws registry.custom.com/aws #replace an existing provider with another
+terraform state list #list out all the resources tracked via the current state file
+terraform state rm  aws_instance.myinstace #unmanage a resource, delete it from Terraform state file
+Terraform Import And Outputs
 
-The Usual Suspects: A Guide to Common Terraform Errors
-Peering into Terraform Configuration Debugging
-Unraveling Rollback and Recovery Strategies
-Horizon Beckons: Future Trends and Culmination
+terraform import aws_instance.new_ec2_instance i-abcd1234 #import EC2 instance with id i-abcd1234 into the Terraform resource named "new_ec2_instance" of type "aws_instance"
+terraform import 'aws_instance.new_ec2_instance[0]' i-abcd1234 #same as above, imports a real-world resource into an instance of Terraform resource
+terraform output #list all outputs as stated in code
+terraform output instance_public_ip # list out a specific declared output
+terraform output -json #list all outputs in JSON format
+Terraform Miscelleneous commands
 
-Terraform's Ever-expanding Ecosystem and Community
-Beyond Terraform: Expanding Automation Horizons
-Embracing DevOps through the Lens of IaC
-Conclusion:
-Terraform stands as the sentinel of modern infrastructure management, offering a pathway to streamlined provisioning, reduced errors, and dynamic scalability. This comprehensive compendium has primed you to embark on your Terraform voyage, from foundational knowledge to advanced insights. Armed with this mastery, you're equipped to take the reins of your infrastructure destiny, steering your projects towards unprecedented success. Happy Terraforming!
+terraform version #display Terraform binary version, also warns if version is old
+terraform get -update=true #download and update modules in the "root" module.
+Terraform Console(Test out Terraform interpolations)
+
+echo 'join(",",["foo","bar"])' | terraform console #echo an expression into terraform console and see its expected result as output
+echo '1 + 5' | terraform console #Terraform console also has an interactive CLI just enter "terraform console"
+echo "aws_instance.my_ec2.public_ip" | terraform console #display the Public IP against the "my_ec2" Terraform resource as seen in the Terraform state file
+Terraform Graph(Dependency Graphing)
+
+terraform graph | dot -Tpng > graph.png #produce a PNG diagrams showing relationship and dependencies between Terraform resource in your configuration/code
+Terraform Taint/Untaint(mark/unmark resource for recreation -> delete and then recreate)
+
+terraform taint aws_instance.my_ec2 #taints resource to be recreated on next apply
+terraform untaint aws_instance.my_ec2 #Remove taint from a resource
+terraform force-unlock LOCK_ID #forcefully unlock a locked state file, LOCK_ID provided when locking the State file beforehand
+Terraform Cloud
+
+terraform login #obtain and save API token for Terraform cloud
+terraform logout #Log out of Terraform Cloud, defaults to hostname app.terraform.io
